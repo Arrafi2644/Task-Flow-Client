@@ -13,9 +13,7 @@ const Banner = () => {
          })
          .catch(err => {
           console.log(err);
-          if(result?.user){
-              toast.error("Something went wrong! Try again.")
-          }
+          
          })
   }
 

@@ -3,22 +3,42 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthProvider';
 import toast from 'react-hot-toast';
 import { onAuthStateChanged } from 'firebase/auth';
+import useAxiosPublic from "../../hooks/useAxiosPublic";
 
 const Navbar = () => {
     const {signInWithGoogle, user, logout} = useContext(AuthContext)
+    const axiosPublic = useAxiosPublic()
     
     const handleSignInWithGoogle = () => {
            signInWithGoogle()
            .then(result => {
             if(result?.user){
-                toast.success("Login successful!")
+
+                const userInfo = {
+                    name: result?.user?.displayName,
+                    email: result?.user?.email                  
+                }
+
+                axiosPublic.post('/users', userInfo)
+                .then(res => {
+                  console.log(res);
+                  if (res.data.insertedId) {
+                    toast.success("User created successfully!")
+                  }
+                  else {
+                    toast.success("Login successful!")
+                    
+                  }
+                })
+                .catch(err => {
+                  console.log(err);
+                })
+
             }
            })
            .catch(err => {
             console.log(err);
-            if(result?.user){
-                toast.error("Something went wrong! Try again.")
-            }
+        
            })
     }
 
