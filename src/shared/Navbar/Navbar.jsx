@@ -1,10 +1,39 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthProvider';
+import toast from 'react-hot-toast';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Navbar = () => {
-    const {name} = useContext(AuthContext)
-    console.log(name);
+    const {signInWithGoogle, user, logout} = useContext(AuthContext)
+    
+    const handleSignInWithGoogle = () => {
+           signInWithGoogle()
+           .then(result => {
+            if(result?.user){
+                toast.success("Login successful!")
+            }
+           })
+           .catch(err => {
+            console.log(err);
+            if(result?.user){
+                toast.error("Something went wrong! Try again.")
+            }
+           })
+    }
+
+    const handleLogout = () => {
+        logout()
+        .then(result => {
+            toast.success("Logout successful!")
+        }).catch(err => {
+            console.log(err);
+        })
+    }
+    console.log(user);
+
+  
+
     return (
         <div className='bg-pink-700 text-white'>
             <div className="navbar max-w-7xl w-11/12 mx-auto">
@@ -56,7 +85,10 @@ const Navbar = () => {
                     </ul>
                 </div> */}
                 <div className="navbar-end">
-                    <a className="btn btn-sm btn-outline text-white border-white hover:border-white hover:bg-pink-800">Login</a>
+                    {
+                        user? <button onClick={handleLogout} className="btn btn-sm btn-outline text-white border-white hover:border-white hover:bg-pink-800">Logout</button>: 
+                    <button onClick={handleSignInWithGoogle} className="btn btn-sm btn-outline text-white border-white hover:border-white hover:bg-pink-800">Login</button>
+                    }
                 </div>
             </div>
         </div>

@@ -1,6 +1,25 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AuthContext } from '../../Context/AuthProvider';
 
 const Banner = () => {
+  const {signInWithGoogle, user, logout} = useContext(AuthContext)
+    
+  const handleSignInWithGoogle = () => {
+         signInWithGoogle()
+         .then(result => {
+          if(result?.user){
+              toast.success("Login successful!")
+          }
+         })
+         .catch(err => {
+          console.log(err);
+          if(result?.user){
+              toast.error("Something went wrong! Try again.")
+          }
+         })
+  }
+
+
     return (
         <div className='bg-pink-600'>
 
@@ -11,7 +30,7 @@ const Banner = () => {
       <p className="py-6 w-full md:w-2/3 mx-auto text-white">
       One app for projects, knowledge, conversations and more. Get more done faster—together.
       </p>
-      <button className="btn bg-pink-700 text-white">Get Started. It's Free</button>
+      <button onClick={handleSignInWithGoogle} className="btn bg-pink-700 hover:bg-pink-800 text-white">Get Started. It's Free</button>
     </div>
   </div>
 </div>
