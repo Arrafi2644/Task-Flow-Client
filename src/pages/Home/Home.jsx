@@ -1,30 +1,35 @@
 import React, { useContext } from 'react';
 import Banner from '../../components/Banner/Banner';
 import { AuthContext } from '../../Context/AuthProvider';
-import useAxiosPublic from '../../hooks/useAxiosPublic';
+
 import toast from 'react-hot-toast';
 import useTasks from '../../hooks/useTasks';
+import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import Swal from 'sweetalert2';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
 
 const Home = () => {
     const { user } = useContext(AuthContext)
     const [tasks, refetch] = useTasks()
-    const axiosPublic = useAxiosPublic()
+    const axiosSecure = useAxiosSecure()
+    const todoTask = tasks.filter(task => task.category === "todo")
+    const inProgressTask = tasks.filter(task => task.category === "inprogress")
+    const doneTask = tasks.filter(task => task.category === "done")
 
-console.log("Tasks are", tasks);
     const handleSubmit = (e) => {
         e.preventDefault()
         const form = e.target;
         const title = form.title.value;
         const description = form.description.value;
         const timestamp = new Date().toString()
-       
+
         console.log(title, description, timestamp);
 
-        if(title.length > 50){
+        if (title.length > 50) {
             return toast.error("Task title cannot exceed 50 characters.")
         }
 
-        if(description.length > 200){
+        if (description.length > 200) {
             return toast.error("Task description cannot exceed 200 characters.")
         }
         const task = {
@@ -35,17 +40,54 @@ console.log("Tasks are", tasks);
             email: user?.email
         }
 
-        axiosPublic.post('/tasks', task)
-        .then(res => {
-            console.log(res);
-            if(res.data.insertedId){
-                toast.success("Task Added Successfully!")
-                refetch()
+        axiosSecure.post('/tasks', task)
+            .then(res => {
+                console.log(res);
+                if (res.data.insertedId) {
+                    toast.success("Task Added Successfully!")
+                    refetch()
+                }
+            })
+            .catch(err => {
+                toast.err("Something went wrong! Try again.")
+            })
+    }
+
+    const handleDeleteTask = (_id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                axiosSecure.delete(`/tasks/${_id}`)
+                    .then(res => {
+                        console.log(res?.data);
+                        if (res.data.deletedCount > 0) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "Your file has been deleted.",
+                                icon: "success"
+                            });
+                            refetch()
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        Swal.fire({
+                            title: "Error!",
+                            text: "Something went wrong! Try again!",
+                            icon: "error"
+                        });
+                    })
+
             }
-        })
-        .catch(err => {
-            toast.err("Something went wrong! Try again.")
-        })
+        });
     }
 
     console.log(tasks);
@@ -67,18 +109,18 @@ console.log("Tasks are", tasks);
                                 </div>
                                 {/* category-content  */}
                                 <div>
-                                    <button onClick={() => document.getElementById('my_modal_4').showModal()} className="btn w-full btn-sm bg-pink-700 hover:bg-pink-800 text-white mb-4">+ Add Task</button>
+                                    <button onClick={() => document.getElementById('my_modal_3').showModal()} className="btn w-full btn-sm bg-pink-700 hover:bg-pink-800 text-white mb-4">+ Add Task</button>
 
                                     {
-                                        tasks.map(task => <div className='bg-pink-400 p-4 rounded-md space-y-2 my-4' key={task._id}>
+                                        todoTask.map(task => <div className='bg-pink-400 p-4 rounded-md space-y-2 my-4' key={task._id}>
 
-                                             <p className='font-bold'> {task.title}</p>
-                                             <p>{task?.description}</p>
-                                             <div className='flex items-center gap-2'>
-                                                <button className="btn btn-sm">Edit</button>
-                                                <button className="btn btn-sm">Delete</button>
-                                             </div>
-                                            </div>)
+                                            <p className='font-bold'> {task.title}</p>
+                                            <p>{task?.description}</p>
+                                            <div className='flex items-center gap-2'>
+                                                <button className="btn btn-sm"><FaEdit></FaEdit></button>
+                                                <button onClick={() => handleDeleteTask(task._id)} className="btn btn-sm"><FaTrashAlt></FaTrashAlt></button>
+                                            </div>
+                                        </div>)
                                     }
                                 </div>
                             </div>
@@ -110,11 +152,11 @@ console.log("Tasks are", tasks);
 
             {/* You can open the modal using document.getElementById('ID').showModal() method */}
             {/* <button className="btn" onClick={() => document.getElementById('my_modal_4').showModal()}>open modal</button> */}
-            <dialog id="my_modal_4" className="modal">
+            <dialog id="my_modal_3" className="modal">
                 <div className="modal-box w-11/12 max-w-5xl">
-                    <h3 className="font-bold text-xl text-center">Add A Task</h3>
+                    <h3 className="font-bold text-xl text-center text-pink-700">Add A Task</h3>
                     <form onSubmit={handleSubmit} className="card-body pt-0">
-            
+
                         <div className="form-control">
                             <label className="label">
                                 <span className="label-text">Task Title</span>
@@ -128,15 +170,9 @@ console.log("Tasks are", tasks);
 
                             <textarea name='description' className="textarea textarea-bordered" maxLength={200} placeholder="Task description"></textarea>
                         </div>
-                        {/* <div className="form-control">
-                            <label className="label">
-                                <span className="label-text">Time</span>
-                            </label>
-                            <input type="date" name='time' placeholder="Select time" className="input input-bordered" required />
-                        </div> */}
 
                         <div className="form-control mt-6">
-                            <button className="btn bg-primary hover:bg-secondary">Add Task</button>
+                            <button className="btn bg-pink-700 hover:bg-pink-800 text-white">Add Task</button>
                         </div>
 
                     </form>

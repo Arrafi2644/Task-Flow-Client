@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../../Context/AuthProvider';
-import useAxiosPublic from '../../hooks/useAxiosPublic';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
 
 const Banner = () => {
   const { signInWithGoogle, user, logout } = useContext(AuthContext)
-  const axiosPublic = useAxiosPublic()
+  const axiosSecure = useAxiosSecure()
 
   const handleSignInWithGoogle = () => {
     signInWithGoogle()
@@ -16,7 +16,7 @@ const Banner = () => {
             email: result?.user?.email
           }
 
-          axiosPublic.post('/users', userInfo)
+          axiosSecure.post('/users', userInfo)
             .then(res => {
               console.log(res);
               if (res.data.insertedId) {
