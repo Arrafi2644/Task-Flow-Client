@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Banner from '../../components/Banner/Banner';
 import { AuthContext } from '../../Context/AuthProvider';
 
@@ -7,9 +7,12 @@ import useTasks from '../../hooks/useTasks';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
+import { IoAddCircleSharp } from 'react-icons/io5';
+import { IoMdAddCircleOutline } from 'react-icons/io';
 
 const Home = () => {
     const { user } = useContext(AuthContext)
+    const [selectedTask, setSelectedTask] = useState(null);
     const [tasks, refetch] = useTasks()
     const axiosSecure = useAxiosSecure()
     const todoTask = tasks.filter(task => task.category === "todo")
@@ -46,6 +49,8 @@ const Home = () => {
                 if (res.data.insertedId) {
                     toast.success("Task Added Successfully!")
                     refetch()
+                    form.reset()
+                    document.getElementById("my_modal_3").close()
                 }
             })
             .catch(err => {
@@ -71,7 +76,7 @@ const Home = () => {
                         if (res.data.deletedCount > 0) {
                             Swal.fire({
                                 title: "Deleted!",
-                                text: "Your file has been deleted.",
+                                text: "Your task has been deleted.",
                                 icon: "success"
                             });
                             refetch()
@@ -85,11 +90,44 @@ const Home = () => {
                             icon: "error"
                         });
                     })
-
             }
         });
     }
 
+
+
+const openEditModal = (task) => {
+    setSelectedTask(task);
+    document.getElementById("edit_task_modal").showModal();
+};
+
+    const handleUpdateTask = (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const updatedTitle = form.title.value;
+        const updatedDescription = form.description.value;
+    
+        const updatedTask = {
+            title: updatedTitle,
+            description: updatedDescription,
+            timestamp: new Date().toString()
+        };
+    
+        axiosSecure.put(`/tasks/${selectedTask._id}`, updatedTask)
+            .then(res => {
+                console.log(res);
+                if (res.data.modifiedCount > 0) {
+                    toast.success("Task Updated Successfully!");
+                    refetch(); // Refresh task list
+                    form.reset();
+                    document.getElementById("edit_task_modal").close();
+                }
+            })
+            .catch(err => {
+                toast.error("Failed to update task!");
+            });
+    };
+    
     console.log(tasks);
     return (
         <div>
@@ -109,7 +147,7 @@ const Home = () => {
                                 </div>
                                 {/* category-content  */}
                                 <div>
-                                    <button onClick={() => document.getElementById('my_modal_3').showModal()} className="btn w-full btn-sm bg-pink-700 hover:bg-pink-800 text-white mb-4">+ Add Task</button>
+                                    <button onClick={() => document.getElementById('my_modal_3').showModal()} className="btn w-full btn-sm bg-pink-700 hover:bg-pink-800 text-white mb-4 flex items-center"><span className='text-base -mr-1'><IoMdAddCircleOutline></IoMdAddCircleOutline> </span> Add Task</button>
 
                                     {
                                         todoTask.map(task => <div className='bg-pink-400 p-4 rounded-md space-y-2 my-4' key={task._id}>
@@ -117,7 +155,7 @@ const Home = () => {
                                             <p className='font-bold'> {task.title}</p>
                                             <p>{task?.description}</p>
                                             <div className='flex items-center gap-2'>
-                                                <button className="btn btn-sm"><FaEdit></FaEdit></button>
+                                                <button onClick={() => openEditModal(task)} className="btn btn-sm"><FaEdit></FaEdit></button>
                                                 <button onClick={() => handleDeleteTask(task._id)} className="btn btn-sm"><FaTrashAlt></FaTrashAlt></button>
                                             </div>
                                         </div>)
@@ -184,6 +222,36 @@ const Home = () => {
                     </div>
                 </div>
             </dialog>
+
+            {/* Edit task modal  */}
+            <dialog id="edit_task_modal" className="modal">
+    <div className="modal-box w-11/12 max-w-5xl">
+        <h3 className="font-bold text-xl text-center text-pink-700">Edit Task</h3>
+        <form onSubmit={handleUpdateTask} className="card-body pt-0">
+            <div className="form-control">
+                <label className="label">
+                    <span className="label-text">Task Title</span>
+                </label>
+                <input type="text" name="title" defaultValue={selectedTask?.title} className="input input-bordered" required />
+            </div>
+            <div className="form-control">
+                <label className="label">
+                    <span className="label-text">Description:</span>
+                </label>
+                <textarea name="description" className="textarea textarea-bordered" defaultValue={selectedTask?.description}></textarea>
+            </div>
+            <div className="form-control mt-6">
+                <button className="btn bg-pink-700 hover:bg-pink-800 text-white">Update Task</button>
+            </div>
+        </form>
+        <div className="modal-action">
+            <form method="dialog">
+                <button className="btn">Close</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
         </div>
 
     );
