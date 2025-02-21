@@ -50,9 +50,7 @@ const Navbar = () => {
             console.log(err);
         })
     }
-    console.log(user);
 
-  
 
     return (
         <div className='bg-pink-700 text-white'>
@@ -106,7 +104,11 @@ const Navbar = () => {
                 </div> */}
                 <div className="navbar-end">
                     {
-                        user? <button onClick={handleLogout} className="btn btn-sm btn-outline text-white border-white hover:border-white hover:bg-pink-800">Logout</button>: 
+                        user?
+                        <div className='flex items-center gap-2'>
+                            <span>{user?.displayName}</span>
+                             <button onClick={handleLogout} className="btn btn-sm btn-outline text-white border-white hover:border-white hover:bg-pink-800">Logout</button>
+                        </div>: 
                     <button onClick={handleSignInWithGoogle} className="btn btn-sm btn-outline text-white border-white hover:border-white hover:bg-pink-800">Login</button>
                     }
                 </div>
