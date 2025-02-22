@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { IoMdAddCircleOutline } from 'react-icons/io';
 import TaskItem from '../../components/TaskItem';
+import Banner from '../../components/Banner/Banner';
 
 const Home = () => {
     const { user } = useContext(AuthContext);
@@ -199,7 +200,7 @@ const Home = () => {
                     </div>
                 </DndProvider>
             ) : (
-                <p>Please log in to manage tasks.</p>
+                <Banner></Banner>
             )}
 
             {/* Add Task Modal */}

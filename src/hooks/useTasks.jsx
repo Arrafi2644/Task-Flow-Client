@@ -7,7 +7,7 @@ const useTasks = () => {
 
     const {user} = useContext(AuthContext)
     const axiosSecure = useAxiosSecure()
-     console.log(user.email);
+     console.log(user?.email);
     const {data: tasks = [], refetch} = useQuery({
         queryKey: [ user?.email,'tasks'],
         enabled: !!user?.email, 
