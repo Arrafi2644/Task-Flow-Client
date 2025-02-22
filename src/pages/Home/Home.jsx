@@ -33,7 +33,10 @@ const Home = () => {
                     refetch();  // ✅ Refresh the tasks after update
                 }
             })
-            .catch(() => toast.error("Failed to move task!"));
+            .catch((err) => {
+                console.log(err);
+                toast.error("Failed to move task!")
+    });
     };
     
 
