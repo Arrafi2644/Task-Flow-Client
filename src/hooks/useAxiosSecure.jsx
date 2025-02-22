@@ -2,7 +2,7 @@ import axios from 'axios';
 import React from 'react';
 
 const axiosSecure = axios.create({
-    baseURL: 'https://task-flow-server-eta.vercel.app'
+    baseURL: 'https://task-management-server-beta-ten.vercel.app'
 })
 
 const useAxiosSecure = () => {
